@@ -4,8 +4,8 @@ public class Book extends Product implements Serializable {
 	private int pages;
 	private String publisher;
 
-	public Book(int articleNumber, String productName, int status, int pages, String publisher, String type) {
-		super(articleNumber, productName, status, type);
+	public Book(int articleNumber, String productName, int pages, String publisher, String type) {
+		super(articleNumber, productName, type);
 		this.pages = pages;
 		this.publisher = publisher;
 	}

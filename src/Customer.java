@@ -6,7 +6,6 @@ public class Customer implements Serializable {
 	private int customerID;
 
 	public Customer(String name, String phone, int customerID) {
-		super();
 		this.name = name;
 		this.phone = phone;
 		this.customerID = customerID;
@@ -34,6 +33,14 @@ public class Customer implements Serializable {
 
 	public void setCustomerID(int customerID) {
 		this.customerID = customerID;
+	}
+	
+	@Override
+	public String toString() {
+
+		String c = getName()+", " + getPhone();
+		
+		return c;
 	}
 
 }

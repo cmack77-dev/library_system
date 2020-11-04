@@ -3,14 +3,15 @@ import java.io.Serializable;
 abstract class Product implements Serializable {
 	private int articleNumber;
 	private String productName;
-	private int status=0;
-	private String type; //ENUM?
+//	private int status=0;
+	private Customer borrowedBy = null;
+	private String type; // ENUM?
 
-	public Product(int articleNumber, String productName, int status, String type) {
+	public Product(int articleNumber, String productName, String type) {
 		this.articleNumber = articleNumber;
 		this.productName = productName;
-		this.status = status;
-		this.type=type;
+//		this.status = status;
+		this.type = type;
 	}
 
 	public int getArticleNumber() {
@@ -29,14 +30,22 @@ abstract class Product implements Serializable {
 		this.productName = productName;
 	}
 
-	public int getStatus() {
-		return status;
+//	public int getStatus() {
+//		return status;
+//	}
+//
+//	public void setStatus(int status) {
+//		this.status = status;
+//	}
+
+	public Customer getBorrowedBy() {
+		return borrowedBy;
 	}
 
-	public void setStatus(int status) {
-		this.status = status;
+	public void setBorrowedBy(Customer borrowedBy) {
+		this.borrowedBy = borrowedBy;
 	}
-	
+
 	public String getType() {
 		return type;
 	}
@@ -46,18 +55,17 @@ abstract class Product implements Serializable {
 	}
 
 	@Override
-	public String toString(){
-		
+	public String toString() {
+
 //		12345 (Book): To Kill a Mockingbird.
 //	    Borrowed by: Alice Doe, 832-337-2959
-		
-		String s=getArticleNumber()+" ("+getType()+"): " + getProductName()+".";
-		if (getStatus() != 0) {
-			s += "\n\tBorrowed by: " + "CUSTOMER";  // ÄNDRA TILL ATT HÄMTA KUNDINFO
-		}
-		else {
+
+		String s = getArticleNumber() + " (" + getType() + "): " + getProductName() + ".";
+		if (getBorrowedBy() != null) {
+			s += "\n\tBorrowed by: " + getBorrowedBy(); 
+		} else {
 			s += " (in stock)";
 		}
-	return s;	
+		return s;
 	}
 }
