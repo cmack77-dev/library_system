@@ -3,14 +3,12 @@ import java.io.Serializable;
 abstract class Product implements Serializable {
 	private int articleNumber;
 	private String productName;
-//	private int status=0;
 	private Customer borrowedBy = null;
 	private String type; // ENUM?
 
 	public Product(int articleNumber, String productName, String type) {
 		this.articleNumber = articleNumber;
 		this.productName = productName;
-//		this.status = status;
 		this.type = type;
 	}
 
@@ -29,14 +27,6 @@ abstract class Product implements Serializable {
 	public void setProductName(String productName) {
 		this.productName = productName;
 	}
-
-//	public int getStatus() {
-//		return status;
-//	}
-//
-//	public void setStatus(int status) {
-//		this.status = status;
-//	}
 
 	public Customer getBorrowedBy() {
 		return borrowedBy;
@@ -57,12 +47,9 @@ abstract class Product implements Serializable {
 	@Override
 	public String toString() {
 
-//		12345 (Book): To Kill a Mockingbird.
-//	    Borrowed by: Alice Doe, 832-337-2959
-
 		String s = getArticleNumber() + " (" + getType() + "): " + getProductName() + ".";
 		if (getBorrowedBy() != null) {
-			s += "\n\tBorrowed by: " + getBorrowedBy(); 
+			s += "\n\tBorrowed by: " + getBorrowedBy();
 		} else {
 			s += " (in stock)";
 		}
