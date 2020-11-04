@@ -4,10 +4,8 @@ public class Movie extends Product implements Serializable {
 	private int runningTime;
 	private float imdbRating;
 
-	
-
-	public Movie(int articleNumber, String productName, int status, int runningTime, float imdbRating) {
-		super(articleNumber, productName, status);
+	public Movie(int articleNumber, String productName, int status, int runningTime, float imdbRating, String type) {
+		super(articleNumber, productName, status, type);
 		this.runningTime = runningTime;
 		this.imdbRating = imdbRating;
 	}
@@ -27,5 +25,6 @@ public class Movie extends Product implements Serializable {
 	public void setImdbRating(float imdbRating) {
 		this.imdbRating = imdbRating;
 	}
+	
 
 }
