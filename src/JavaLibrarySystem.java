@@ -41,7 +41,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 */
 	enum Command {
 
-		LIST, CHECKOUT, CHECKIN, REGISTER, DEREGISTER, INFO, QUIT, UNKNOWN,
+		LIST, CUSTOMERS, CHECKOUT, CHECKIN, REGISTER, DEREGISTER, INFO, QUIT, UNKNOWN,
 	}
 
 	/**
@@ -95,7 +95,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 */
 	public void runSystem() {
 
-		listCommand();
+		listProductsCommand();
+
 		boolean running = true;
 		Scanner scanner = new Scanner(System.in);
 
@@ -113,7 +114,10 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 			switch (command) {
 			case LIST:
-				listCommand();
+				listProductsCommand();
+				break;
+			case CUSTOMERS:
+				listCustomerCommand();
 				break;
 			case CHECKOUT:
 				checkOutCommand(argument);
@@ -141,6 +145,21 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	}
 
+	/**
+	 * Method for listing all customers.
+	 */
+	private void listCustomerCommand() {
+		for (Customer customer : this.customers) {
+			System.out.println(customer);
+		}
+	}
+
+	/**
+	 * Parse arguments in entered command.
+	 * 
+	 * @param userInput
+	 * @return arguments to be passed to switch.
+	 */
 	private String parseArguments(String userInput) {
 
 		String[] commandAndArguments = userInput.split(" ");
@@ -156,13 +175,21 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		return args;
 	}
 
-	private void listCommand() {
+	/**
+	 * Lists all products in library.
+	 */
+	private void listProductsCommand() {
 		for (E prod : this.products) {
 			System.out.println(prod);
 		}
-
 	}
 
+	/**
+	 * Sets a specified product to borrowed by a specific customer who already
+	 * exists or gets created by user.
+	 * 
+	 * @param argument holds the productID to be checked out.
+	 */
 	private void checkOutCommand(String argument) {
 		int productID = Integer.parseInt(argument);
 
@@ -191,7 +218,6 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			customerPhone = userReg.nextLine();
 
 			// SET CUSTOMER ID
-
 			customerID = this.customers.size() + 1;
 			this.customers.add(new Customer(customerName, customerPhone, (customerID)));
 			for (int n = 0; n < this.customers.size(); n++) {
@@ -224,10 +250,30 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	}
 
+	/**
+	 * Lets a borrowed product be returned in stock.
+	 * 
+	 * @param argument holds productID for relevant product to be checke in.
+	 */
 	private void checkInCommand(String argument) {
+		int productID = Integer.parseInt(argument);
 
+		for (int i = 0; i < this.products.size(); i++) {
+			if (this.products.get(i).getArticleNumber() == productID) {
+				if (this.products.get(i).getBorrowedBy() == null) {
+					System.out.println("Cannot return " + this.products.get(i).getProductName()
+							+ ". It is not borrowed by any customer.");
+					return;
+				} else {
+					this.products.get(i).setBorrowedBy(null);
+				}
+			}
+		}
 	}
 
+	/**
+	 * Registers a new product.
+	 */
 	private void registerCommand() {
 		Scanner userReg = new Scanner(System.in);
 		System.out.print("What do you want to register? Movie (a), Book (b)\n> ");
@@ -279,6 +325,12 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	}
 
+	/**
+	 * Decides if the productID is unique.
+	 * 
+	 * @param productID holds the productID to be compared to existing productID's.
+	 * @return true or false.
+	 */
 	private boolean isUniqueID(int productID) {
 		boolean unique = true;
 		for (int i = 0; i < this.products.size(); i++) {
@@ -289,8 +341,13 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		return unique;
 	}
 
+	/**
+	 * Deletes a product from library.
+	 * 
+	 * @param argument holds the productID of product to be deleted.
+	 */
 	private void deRegisterCommand(String argument) {
-
+// fortsätter med denna nu.
 	}
 
 	private void infoCommand(int productID) {
@@ -314,6 +371,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		switch (commandString) {
 		case "list":
 			return Command.LIST;
+		case "customers":
+			return Command.CUSTOMERS; // Added function for retrieving list of customers.
 		case "checkout":
 			return Command.CHECKOUT;
 		case "checkin":
