@@ -38,7 +38,7 @@ public class Customer implements Serializable {
 	@Override
 	public String toString() {
 
-		String c = getName() + ", " + getPhone();
+		String c = getName() + ", " + getPhone()+ ", "+ getCustomerID();
 
 		return c;
 	}

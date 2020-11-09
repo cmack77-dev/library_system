@@ -55,37 +55,38 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		// Create instance of LibraryManager
 		JavaLibrarySystem libraryManager = new JavaLibrarySystem();
 
-		// READ LIBRARY FROM BIN FILE IF EXISTS OTHERWISE CREATE NEW!
+		// READ LIBRARY FROM BIN FILE IF EXISTS.
+		libraryManager = readFile(libraryManager);
+
+//		RUN SYSTEM
+		libraryManager.runSystem();
+
+		// SAVE BIN FILE AT THE END OF THE PROGRAM.
+		saveFile(libraryManager);
+
+		System.out.println("Exiting library.");
+		System.exit(0);
+
+	}
+
+	private static void saveFile(JavaLibrarySystem libraryManager) throws IOException {
+		FileOutputStream fos = null;
+		fos = new FileOutputStream(FILE_PATH);
+		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		oos.writeObject(libraryManager);
+	}
+
+	private static JavaLibrarySystem readFile(JavaLibrarySystem libraryManager)
+			throws IOException, ClassNotFoundException {
 		File file = new File(FILE_PATH);
 		if (file.exists()) {
 			FileInputStream fis = new FileInputStream(FILE_PATH);
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			libraryManager = (JavaLibrarySystem) ois.readObject();
 			System.out.println("Current inventory:");
+			return libraryManager;
 		}
-
-//		libraryManager.customers.add(new Customer("Lars Larsson", "0736-832334", 00001));
-//		libraryManager.customers.add(new Customer("Jan Persson", "0732-626273", 00002));
-//
-//		libraryManager.products.add(new Movie(1001, "Conan barbaren", 124, 7.2f, "Movie"));
-//		System.out.println(libraryManager.customers.get(0));
-//		System.out.println(libraryManager.customers.get(1));
-//		System.out.println(libraryManager.products.get(0));
-//		System.out.println(customer);
-//
-//		movie.setBorrowedBy(customer);
-//		System.out.println(movie);
-
-//		RUN SYSTEM
-		libraryManager.runSystem();
-
-		// SAVE BIN FILE AT THE END OF THE PROGRAM
-		FileOutputStream fos = null;
-		fos = new FileOutputStream(FILE_PATH);
-		ObjectOutputStream oos = new ObjectOutputStream(fos);
-		oos.writeObject(libraryManager);
-		System.out.println("Exiting library.");
-		System.exit(0);
+		return libraryManager;
 
 	}
 
@@ -144,10 +145,12 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 		String[] commandAndArguments = userInput.split(" ");
 		String args = "";
-		try {
-			args = commandAndArguments[1];
-		} catch (ArrayIndexOutOfBoundsException e) {
-
+		if (commandAndArguments.length > 1) {
+			try {
+				args = commandAndArguments[1];
+			} catch (ArrayIndexOutOfBoundsException e) {
+				System.out.println("Array out of bounds. Too many argumnets after command");
+			}
 		}
 
 		return args;
@@ -161,6 +164,63 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	}
 
 	private void checkOutCommand(String argument) {
+		int productID = Integer.parseInt(argument);
+
+		for (int i = 0; i < this.products.size(); i++) {
+			if (this.products.get(i).getArticleNumber() == productID) {
+				if (this.products.get(i).getBorrowedBy() != null) {
+					System.out.println("Cannot lend " + this.products.get(i).getProductName()
+							+ " to another customer. It is already borrowed by " + this.products.get(i).getBorrowedBy()
+							+ ".");
+					return;
+				}
+			}
+		}
+
+		Scanner userReg = new Scanner(System.in);
+		String customerName;
+		String customerPhone;
+		int customerID;
+		Customer customer = null;
+		System.out.println("Checkpout for? New customer (a) or Returning customer (b)");
+		String in = userReg.nextLine().toLowerCase();
+		if (in.equals("a")) {
+			System.out.println("Enter customer name:");
+			customerName = userReg.nextLine();
+			System.out.println("Enter customer phone number:");
+			customerPhone = userReg.nextLine();
+
+			// SET CUSTOMER ID
+
+			customerID = this.customers.size() + 1;
+			this.customers.add(new Customer(customerName, customerPhone, (customerID)));
+			for (int n = 0; n < this.customers.size(); n++) {
+				if (this.customers.get(n).getCustomerID() == customerID) {
+					customer = this.customers.get(n);
+				}
+
+			}
+		}
+		if (in.equals("b")) {
+			System.out.println("Enter customer ID:");
+			customerID = userReg.nextInt();
+
+			for (int i = 0; i < this.customers.size(); i++) {
+				if (this.customers.get(i).getCustomerID() == customerID) {
+					customerName = this.customers.get(i).getName();
+					customerPhone = this.customers.get(i).getPhone();
+					customer = this.customers.get(i);
+				} else {
+					System.out.println("No such customerID");
+				}
+			}
+		}
+
+		for (int i = 0; i < this.products.size(); i++) {
+			if (this.products.get(i).getArticleNumber() == productID) {
+				this.products.get(i).setBorrowedBy(customer);
+			}
+		}
 
 	}
 
@@ -170,12 +230,17 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	private void registerCommand() {
 		Scanner userReg = new Scanner(System.in);
-		System.out.print("What do you want to register? A - Movie B - Book\n> ");
+		System.out.print("What do you want to register? Movie (a), Book (b)\n> ");
 		/* bygger vidare på det nu */
-		String in = userReg.nextLine().toUpperCase();
-		if (in.equals("A")) {
+		String in = userReg.nextLine().toLowerCase();
+		if (in.equals("a")) {
 			System.out.print("Enter product ID:\n> ");
 			int productID = userReg.nextInt();
+			while (!isUniqueID(productID)) {
+				System.out.print("Error: product with ID already exists. Enter unique product ID:\n> ");
+				productID = userReg.nextInt();
+			}
+
 			userReg.nextLine();
 			System.out.print("Enter title:\n> ");
 			String title = userReg.nextLine();
@@ -188,9 +253,14 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			System.out.print("Enter imdbRating:\n> ");
 			float imdbRating = userReg.nextFloat();
 			this.products.add((E) new Movie(productID, title, runningTime, imdbRating, "Movie", value));
-		} else {
+		}
+		if (in.equals("b")) {
 			System.out.print("Enter product ID:\n> ");
 			int productID = userReg.nextInt();
+			while (!isUniqueID(productID)) {
+				System.out.print("ID already exists. Enter unique product ID:\n> ");
+				productID = userReg.nextInt();
+			}
 			userReg.nextLine();
 			System.out.print("Enter title:\n> ");
 			String title = userReg.nextLine();
@@ -203,9 +273,20 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			System.out.print("Enter publisher:\n> ");
 			String publisher = userReg.nextLine();
 			this.products.add((E) new Book(productID, title, numberOfPages, publisher, "Book", value));
+		} else {
+			System.out.println("Try again!");
 		}
-//		this.products.add(new Movie(1001, "Conan barbaren", 124, 7.2f, "Movie"));
 
+	}
+
+	private boolean isUniqueID(int productID) {
+		boolean unique = true;
+		for (int i = 0; i < this.products.size(); i++) {
+			if (this.products.get(i).getArticleNumber() == productID) {
+				unique = false;
+			}
+		}
+		return unique;
 	}
 
 	private void deRegisterCommand(String argument) {
@@ -213,19 +294,19 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	}
 
 	private void infoCommand(int productID) {
-
+		boolean noSuchProductID = true;
 		for (int i = 0; i < this.products.size(); i++) {
 			Product.showInfo = true;
+
 			if (this.products.get(i).getArticleNumber() == productID) {
-				if (this.products.get(i).getType().equals("Movie")) {
-					System.out.println((Movie) this.products.get(i));
-				} else {
-					System.out.println((Book) this.products.get(i));
-				}
+				System.out.println(this.products.get(i));
+				noSuchProductID = false;
 				Product.showInfo = false;
 			}
 		}
-
+		if (noSuchProductID) {
+			System.out.println("No product with id " + productID + " registered.");
+		}
 	}
 
 	private Command parseCommand(String userInput) {
