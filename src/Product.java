@@ -4,12 +4,23 @@ abstract class Product implements Serializable {
 	private int articleNumber;
 	private String productName;
 	private Customer borrowedBy = null;
-	private String type; // ENUM?
+	private String type;
+	private double value;
+	static boolean showInfo = false;
 
-	public Product(int articleNumber, String productName, String type) {
+	public Product(int articleNumber, String productName, String type, double value) {
 		this.articleNumber = articleNumber;
 		this.productName = productName;
 		this.type = type;
+		this.value = value;
+	}
+
+	public static boolean isShowInfo() {
+		return showInfo;
+	}
+
+	public static void setShowInfo(boolean showInfo) {
+		Product.showInfo = showInfo;
 	}
 
 	public int getArticleNumber() {
@@ -44,15 +55,12 @@ abstract class Product implements Serializable {
 		this.type = type;
 	}
 
-	@Override
-	public String toString() {
-
-		String s = getArticleNumber() + " (" + getType() + "): " + getProductName() + ".";
-		if (getBorrowedBy() != null) {
-			s += "\n\tBorrowed by: " + getBorrowedBy();
-		} else {
-			s += " (in stock)";
-		}
-		return s;
+	public double getValue() {
+		return value;
 	}
+
+	public void setValue(double value) {
+		this.value = value;
+	}
+
 }

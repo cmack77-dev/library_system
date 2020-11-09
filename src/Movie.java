@@ -4,8 +4,8 @@ public class Movie extends Product implements Serializable {
 	private int runningTime;
 	private float imdbRating;
 
-	public Movie(int articleNumber, String productName, int runningTime, float imdbRating, String type) {
-		super(articleNumber, productName, type);
+	public Movie(int articleNumber, String productName, int runningTime, float imdbRating, String type, double value) {
+		super(articleNumber, productName, type, value);
 		this.runningTime = runningTime;
 		this.imdbRating = imdbRating;
 	}
@@ -24,6 +24,23 @@ public class Movie extends Product implements Serializable {
 
 	public void setImdbRating(float imdbRating) {
 		this.imdbRating = imdbRating;
+	}
+
+	@Override
+	public String toString() {
+		String s;
+		if (!showInfo) {
+			s = getArticleNumber() + " (" + getType() + "): " + getProductName() + ".";
+			if (getBorrowedBy() != null) {
+				s += "\n\tBorrowed by: " + getBorrowedBy();
+			} else {
+				s += " (in stock)";
+			}
+		} else {
+			s = " (" + getType() + "): " + getProductName() + ": Value " + getValue() + "kr, Length " + getRunningTime()
+					+ ", Rating " + getImdbRating();
+		}
+		return s;
 	}
 
 }

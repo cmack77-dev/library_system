@@ -51,6 +51,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @throws ClassNotFoundException
 	 */
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
+		System.out.println("Welcome!");
 		// Create instance of LibraryManager
 		JavaLibrarySystem libraryManager = new JavaLibrarySystem();
 
@@ -60,6 +61,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			FileInputStream fis = new FileInputStream(FILE_PATH);
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			libraryManager = (JavaLibrarySystem) ois.readObject();
+			System.out.println("Current inventory:");
 		}
 
 //		libraryManager.customers.add(new Customer("Lars Larsson", "0736-832334", 00001));
@@ -87,19 +89,17 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	}
 
-	/*
+	/**
 	 * 
 	 */
 	public void runSystem() {
-		System.out.println("Welcome!");
-		System.out.println("Current inventory:");
-		listCommand();
 
+		listCommand();
 		boolean running = true;
 		Scanner scanner = new Scanner(System.in);
 
 		while (running) {
-
+			System.out.print("\nEnter command\n> ");
 			String userInput = scanner.nextLine();
 			Command command = parseCommand(userInput);
 
@@ -108,29 +108,29 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				continue;
 			}
 
-			String[] arguments = parseArguments(userInput);
+			String argument = parseArguments(userInput);
 
 			switch (command) {
 			case LIST:
 				listCommand();
 				break;
 			case CHECKOUT:
-				checkOutCommand(arguments);
+				checkOutCommand(argument);
 				break;
 			case CHECKIN:
-				checkInCommand(arguments);
+				checkInCommand(argument);
 				break;
 			case REGISTER:
-				registerCommand(arguments);
+				registerCommand();
 				break;
 			case DEREGISTER:
-				deRegisterCommand(arguments);
+				deRegisterCommand(argument);
 				break;
 			case QUIT:
 				running = false;
 				break;
 			case INFO:
-				infoCommand();
+				infoCommand(Integer.parseInt(argument));
 				break;
 			}
 
@@ -140,9 +140,17 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	}
 
-	private String[] parseArguments(String userInput) {
+	private String parseArguments(String userInput) {
 
-		return null;
+		String[] commandAndArguments = userInput.split(" ");
+		String args = "";
+		try {
+			args = commandAndArguments[1];
+		} catch (ArrayIndexOutOfBoundsException e) {
+
+		}
+
+		return args;
 	}
 
 	private void listCommand() {
@@ -152,26 +160,71 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	}
 
-	private void checkOutCommand(String[] arguments) {
+	private void checkOutCommand(String argument) {
 
 	}
 
-	private void checkInCommand(String[] arguments) {
+	private void checkInCommand(String argument) {
 
 	}
 
-	private void registerCommand(String[] arguments) {
+	private void registerCommand() {
 		Scanner userReg = new Scanner(System.in);
-		System.out.println("What do you want to register? A - Movie B - Book");
+		System.out.print("What do you want to register? A - Movie B - Book\n> ");
 		/* bygger vidare på det nu */
+		String in = userReg.nextLine().toUpperCase();
+		if (in.equals("A")) {
+			System.out.print("Enter product ID:\n> ");
+			int productID = userReg.nextInt();
+			userReg.nextLine();
+			System.out.print("Enter title:\n> ");
+			String title = userReg.nextLine();
+			System.out.print("Enter value:\n> ");
+			double value = userReg.nextDouble();
+			userReg.nextLine();
+			System.out.print("Enter running time:\n> ");
+			int runningTime = userReg.nextInt();
+			userReg.nextLine();
+			System.out.print("Enter imdbRating:\n> ");
+			float imdbRating = userReg.nextFloat();
+			this.products.add((E) new Movie(productID, title, runningTime, imdbRating, "Movie", value));
+		} else {
+			System.out.print("Enter product ID:\n> ");
+			int productID = userReg.nextInt();
+			userReg.nextLine();
+			System.out.print("Enter title:\n> ");
+			String title = userReg.nextLine();
+			System.out.print("Enter value:\n> ");
+			double value = userReg.nextDouble();
+			userReg.nextLine();
+			System.out.print("Enter number of pages:\n> ");
+			int numberOfPages = userReg.nextInt();
+			userReg.nextLine();
+			System.out.print("Enter publisher:\n> ");
+			String publisher = userReg.nextLine();
+			this.products.add((E) new Book(productID, title, numberOfPages, publisher, "Book", value));
+		}
+//		this.products.add(new Movie(1001, "Conan barbaren", 124, 7.2f, "Movie"));
 
 	}
 
-	private void deRegisterCommand(String[] arguments) {
+	private void deRegisterCommand(String argument) {
 
 	}
 
-	private void infoCommand() {
+	private void infoCommand(int productID) {
+
+		for (int i = 0; i < this.products.size(); i++) {
+			Product.showInfo = true;
+			if (this.products.get(i).getArticleNumber() == productID) {
+				if (this.products.get(i).getType().equals("Movie")) {
+					System.out.println((Movie) this.products.get(i));
+				} else {
+					System.out.println((Book) this.products.get(i));
+				}
+				Product.showInfo = false;
+			}
+		}
 
 	}
 

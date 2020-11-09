@@ -34,12 +34,12 @@ public class Customer implements Serializable {
 	public void setCustomerID(int customerID) {
 		this.customerID = customerID;
 	}
-	
+
 	@Override
 	public String toString() {
 
-		String c = getName()+", " + getPhone();
-		
+		String c = getName() + ", " + getPhone();
+
 		return c;
 	}
 
