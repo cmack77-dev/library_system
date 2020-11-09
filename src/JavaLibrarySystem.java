@@ -224,7 +224,6 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				if (this.customers.get(n).getCustomerID() == customerID) {
 					customer = this.customers.get(n);
 				}
-
 			}
 		}
 		if (in.equals("b")) {
@@ -245,6 +244,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		for (int i = 0; i < this.products.size(); i++) {
 			if (this.products.get(i).getArticleNumber() == productID) {
 				this.products.get(i).setBorrowedBy(customer);
+				System.out.println("Succesfully lended " + this.products.get(i).getProductName() + " to "
+						+ this.products.get(i).getBorrowedBy() + ".");
 			}
 		}
 
@@ -265,7 +266,10 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 							+ ". It is not borrowed by any customer.");
 					return;
 				} else {
+					Customer customer = this.products.get(i).getBorrowedBy();
 					this.products.get(i).setBorrowedBy(null);
+					System.out.println("Succesfully returned " + this.products.get(i).getProductName() + " from "
+							+ customer + ".");
 				}
 			}
 		}
@@ -299,8 +303,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			System.out.print("Enter imdbRating:\n> ");
 			float imdbRating = userReg.nextFloat();
 			this.products.add((E) new Movie(productID, title, runningTime, imdbRating, "Movie", value));
-		}
-		if (in.equals("b")) {
+		} else if (in.equals("b")) {
 			System.out.print("Enter product ID:\n> ");
 			int productID = userReg.nextInt();
 			while (!isUniqueID(productID)) {
@@ -347,7 +350,19 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @param argument holds the productID of product to be deleted.
 	 */
 	private void deRegisterCommand(String argument) {
-// fortsätter med denna nu.
+		int productID = Integer.parseInt(argument);
+
+		for (int i = 0; i < this.products.size(); i++) {
+			if (this.products.get(i).getArticleNumber() == productID) {
+				if (this.products.get(i).getBorrowedBy() != null) {
+					System.out.println("Cannot delete " + this.products.get(i).getProductName()
+							+ ". It is borrowed by \" + this.products.get(i).getBorrowedBy()\r\n" + ".");
+					return;
+				} else {
+					this.products.remove(i);
+				}
+			}
+		}
 	}
 
 	private void infoCommand(int productID) {
