@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public class Customer implements Serializable {
+public class Customer implements Comparable<Customer>, Serializable {
 	private String name;
 	private String phone;
 	private int customerID;
@@ -38,9 +38,19 @@ public class Customer implements Serializable {
 	@Override
 	public String toString() {
 
-		String c = getName() + ", " + getPhone()+ ", "+ getCustomerID();
+		String c = getName() + ", " + getPhone() + ", " + getCustomerID();
 
 		return c;
+	}
+
+	@Override
+	public int compareTo(Customer compareCust) {
+		int compareCustomerID = ((Customer) compareCust).getCustomerID();
+		/* For Ascending order */
+		return this.customerID - compareCustomerID;
+
+		/* For Descending order do like this */
+		// return compareCustomerID-this.customerID;
 	}
 
 }

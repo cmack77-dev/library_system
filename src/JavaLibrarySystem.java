@@ -8,13 +8,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
-import java.util.Scanner;
 
 /**
  * 
  * Java Library System for management of movies and books.
  * 
- * @author Markus Johanssson & Stefan Kusmuk
+ * @author Markus Johanssson and Stefan Kusmuk
  * 
  */
 public class JavaLibrarySystem<E extends Product> implements Serializable {
@@ -58,24 +57,40 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		// READ LIBRARY FROM BIN FILE IF EXISTS.
 		libraryManager = readFile(libraryManager);
 
-//		RUN SYSTEM
-		libraryManager.runSystem();
+		// RUN SYSTEM
+		libraryManager.runSystem(libraryManager);
 
 		// SAVE BIN FILE AT THE END OF THE PROGRAM.
 		saveFile(libraryManager);
 
 		System.out.println("Exiting library.");
 		System.exit(0);
-
 	}
 
+	/**
+	 * Saves all to a .bin file.
+	 * 
+	 * @param libraryManager The JavaLibrarySystem object is passed to the method in
+	 *                       order to save it to the bin file.
+	 * @throws IOException
+	 */
 	private static void saveFile(JavaLibrarySystem libraryManager) throws IOException {
 		FileOutputStream fos = null;
 		fos = new FileOutputStream(FILE_PATH);
 		ObjectOutputStream oos = new ObjectOutputStream(fos);
 		oos.writeObject(libraryManager);
+		oos.close();
 	}
 
+	/**
+	 * Reads data from bin file, if it exists, into the JavaLibrarySystem object.
+	 * 
+	 * @param libraryManager The JavaLibrarySystem object is passed to the method in
+	 *                       order to initialize it with data from the .bin file.
+	 * @return The initialized JavaLibrarySystem object.
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	private static JavaLibrarySystem readFile(JavaLibrarySystem libraryManager)
 			throws IOException, ClassNotFoundException {
 		File file = new File(FILE_PATH);
@@ -84,6 +99,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			libraryManager = (JavaLibrarySystem) ois.readObject();
 			System.out.println("Current inventory:");
+			ois.close();
 			return libraryManager;
 		}
 		return libraryManager;
@@ -91,9 +107,12 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	}
 
 	/**
+	 * The method that handles the runtime part of the program. All commands are
+	 * entered through this UI.
 	 * 
+	 * @throws IOException
 	 */
-	public void runSystem() {
+	public void runSystem(JavaLibrarySystem<E> libraryManager) throws IOException {
 
 		listProductsCommand();
 
@@ -121,21 +140,29 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				break;
 			case CHECKOUT:
 				checkOutCommand(argument);
+				sortCustomerList(libraryManager);
+				saveFile(libraryManager);
 				break;
 			case CHECKIN:
 				checkInCommand(argument);
 				break;
 			case REGISTER:
 				registerCommand();
+				sortProductList(libraryManager);
+				saveFile(libraryManager);
 				break;
 			case DEREGISTER:
 				deRegisterCommand(argument);
+				sortProductList(libraryManager);
+				saveFile(libraryManager);
 				break;
 			case QUIT:
 				running = false;
 				break;
 			case INFO:
 				infoCommand(Integer.parseInt(argument));
+				break;
+			case UNKNOWN:
 				break;
 			}
 
@@ -147,6 +174,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	/**
 	 * Method for listing all customers.
+	 * 
+	 * @param libraryManager
 	 */
 	private void listCustomerCommand() {
 		for (Customer customer : this.customers) {
@@ -154,11 +183,19 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		}
 	}
 
+	private void sortProductList(JavaLibrarySystem<E> libraryManager) {
+		Collections.sort(libraryManager.products);
+	}
+
+	private void sortCustomerList(JavaLibrarySystem libraryManager) {
+		Collections.sort(libraryManager.customers);
+	}
+
 	/**
-	 * Parse arguments in entered command.
+	 * Parse arguments in entered data.
 	 * 
-	 * @param userInput
-	 * @return arguments to be passed to switch.
+	 * @param userInput data to be parsed.
+	 * @return parsed arguments to be passed to a method.
 	 */
 	private String parseArguments(String userInput) {
 
@@ -248,6 +285,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 						+ this.products.get(i).getBorrowedBy() + ".");
 			}
 		}
+		userReg.close();
 
 	}
 
@@ -347,7 +385,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	/**
 	 * Deletes a product from library.
 	 * 
-	 * @param argument holds the productID of product to be deleted.
+	 * @param argument       holds the productID of product to be deleted.
+	 * @param libraryManager
 	 */
 	private void deRegisterCommand(String argument) {
 		int productID = Integer.parseInt(argument);
@@ -365,6 +404,11 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		}
 	}
 
+	/**
+	 * Prints all products in the library.
+	 * 
+	 * @param productID holds the productID to be compared to existing productID's.
+	 */
 	private void infoCommand(int productID) {
 		boolean noSuchProductID = true;
 		for (int i = 0; i < this.products.size(); i++) {
@@ -381,6 +425,12 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		}
 	}
 
+	/**
+	 * Parse command in entered data.
+	 * 
+	 * @param userInput entered data to be parsed.
+	 * @return parsed command to be passed to switch.
+	 */
 	private Command parseCommand(String userInput) {
 		String commandString = userInput.split(" ")[0].toLowerCase();
 		switch (commandString) {

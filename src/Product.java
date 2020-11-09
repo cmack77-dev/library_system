@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-abstract class Product implements Serializable {
+abstract class Product implements Comparable<Product>, Serializable {
 	private int articleNumber;
 	private String productName;
 	private Customer borrowedBy = null;
@@ -8,6 +8,14 @@ abstract class Product implements Serializable {
 	private double value;
 	static boolean showInfo = false;
 
+	/**
+	 * Constructor for Product.
+	 * 
+	 * @param articleNumber Sets article number for Product.
+	 * @param productName   Sets product name for Product.
+	 * @param type          Sets type of product.
+	 * @param value         Sets the value of the product.
+	 */
 	public Product(int articleNumber, String productName, String type, double value) {
 		this.articleNumber = articleNumber;
 		this.productName = productName;
@@ -15,10 +23,19 @@ abstract class Product implements Serializable {
 		this.value = value;
 	}
 
+	/**
+	 * Specifies which info to print for the toString method
+	 * 
+	 * @return true or false.
+	 */
 	public static boolean isShowInfo() {
 		return showInfo;
 	}
 
+	/**
+	 * 
+	 * @param showInfo sets the showInfo to true or false.
+	 */
 	public static void setShowInfo(boolean showInfo) {
 		Product.showInfo = showInfo;
 	}
@@ -63,4 +80,13 @@ abstract class Product implements Serializable {
 		this.value = value;
 	}
 
+	@Override
+    public int compareTo(Product compareProd) {
+        int compareArticleNumber=((Product)compareProd).getArticleNumber();
+        /* For Ascending order*/
+        return this.articleNumber-compareArticleNumber;
+
+        /* For Descending order do like this */
+        //return compareArticleNumber-this.ArticleNumber;
+	}
 }
