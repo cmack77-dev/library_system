@@ -5,6 +5,14 @@ public class Customer implements Comparable<Customer>, Serializable {
 	private String phone;
 	private int customerID;
 
+	/**
+	 * Constructor for Customer.
+	 * 
+	 * @param name        Sets name for Customer.
+	 * @param phone       Sets phone number for Customer.
+	 * @param customerID  Sets identifier for Customer.
+	 */
+	
 	public Customer(String name, String phone, int customerID) {
 		this.name = name;
 		this.phone = phone;
@@ -34,7 +42,10 @@ public class Customer implements Comparable<Customer>, Serializable {
 	public void setCustomerID(int customerID) {
 		this.customerID = customerID;
 	}
-
+	
+    /** 
+     * @return customer information as String.
+     */
 	@Override
 	public String toString() {
 
@@ -43,6 +54,9 @@ public class Customer implements Comparable<Customer>, Serializable {
 		return c;
 	}
 
+	/** 
+     * Sets the customer-ID to specific Customer.
+     */
 	@Override
 	public int compareTo(Customer compareCust) {
 		int compareCustomerID = ((Customer) compareCust).getCustomerID();

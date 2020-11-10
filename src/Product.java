@@ -80,6 +80,10 @@ abstract class Product implements Comparable<Product>, Serializable {
 		this.value = value;
 	}
 
+	/** 
+     * Sets the article-ID to specific Product.
+     */
+	
 	@Override
     public int compareTo(Product compareProd) {
         int compareArticleNumber=((Product)compareProd).getArticleNumber();
