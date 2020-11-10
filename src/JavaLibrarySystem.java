@@ -3,11 +3,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.*;
 
@@ -69,16 +67,14 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			libraryManager.runSystem(libraryManager);
 		} catch (Exception e1) {
 			System.out.println("Caught exception: System won't run");
-			e1.printStackTrace();
 		}
 
 		// SAVE BIN FILE AT THE END OF THE PROGRAM.
 		try {
 			saveFile(libraryManager);
 		} catch (Exception e) {
-			System.out.println("Caught exception: Could not save");
+			System.out.println("Caught exception: Could't save to file");
 			e.printStackTrace();
-
 		}
 
 		System.out.println("Good bye!");
@@ -86,24 +82,442 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	}
 
 	/**
-	 * Saves all to a .bin file.
+	 * Parse command in entered data.
 	 * 
-	 * @param libraryManager The JavaLibrarySystem object is passed to the method in
-	 *                       order to save it to the bin file.
+	 * @param userInput entered data to be parsed.
+	 * @return parsed command to be passed to switch.
 	 */
-	private static void saveFile(JavaLibrarySystem libraryManager) {
+	private Command parseCommand(String userInput) {
+		String commandString = userInput.split(" ")[0].toLowerCase();
+		switch (commandString) {
+		case "list":
+			return Command.LIST;
+		case "help":
+			return Command.HELP; // Added function for printing out instructions for the program.
+		case "customers":
+			return Command.CUSTOMERS; // Added function for retrieving list of customers.
+		case "checkout":
+			return Command.CHECKOUT;
+		case "checkin":
+			return Command.CHECKIN;
+		case "register":
+			return Command.REGISTER;
+		case "deregister":
+			return Command.DEREGISTER;
+		case "info":
+			return Command.INFO;
+		case "quit":
+			return Command.QUIT;
+		default:
+			return Command.UNKNOWN;
+		}
+	}
+
+	/**
+	 * Parse arguments in entered data.
+	 * 
+	 * @param userInput data to be parsed.
+	 * @return parsed arguments to be passed to a method.
+	 */
+	private String parseArguments(String userInput) {
+		String[] commandAndArguments = userInput.split(" ");
+		String args = "";
+
 		try {
-			FileOutputStream fos = null;
-			fos = new FileOutputStream(FILE_PATH);
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(libraryManager);
-			oos.close();
-		} catch (IOException e) {
-			System.out.println("Caught exception:");
+			args = commandAndArguments[1];
+		} catch (ArrayIndexOutOfBoundsException e) {
+//			System.out.println("Error! Try again");
+			args = "0";
+		}
+
+		return args;
+	}
+
+	/**
+	 * The method that handles the runtime part of the program. All commands are
+	 * entered through this UI.
+	 */
+	public void runSystem(JavaLibrarySystem<E> libraryManager) {
+		listProductsCommand();
+		boolean running = true;
+		Scanner scanner = new Scanner(System.in);
+
+		while (running) {
+			System.out.print("\nEnter command\n> ");
+			String userInput = scanner.nextLine();
+			Command command = parseCommand(userInput);
+			if (command == Command.UNKNOWN) {
+				System.out.println("Unknown command. Try again");
+				continue;
+			}
+
+			String argument = parseArguments(userInput);
+			switch (command) {
+			case LIST:
+				listProductsCommand();
+				break;
+			case HELP:
+				help();
+				break;
+			case CUSTOMERS:
+				listCustomerCommand();
+				break;
+			case CHECKOUT:
+				try {
+					checkOutCommand(argument, libraryManager);
+				} catch (Exception e) {
+					System.out.println("IO Exception");
+					e.printStackTrace();
+				}
+				break;
+			case CHECKIN:
+				checkInCommand(argument);
+				break;
+			case REGISTER:
+				try {
+					registerCommand(libraryManager);
+				} catch (Exception e) {
+					System.out.println("IO Exception");
+					e.printStackTrace();
+				}
+				break;
+			case DEREGISTER:
+				deRegisterCommand(argument, libraryManager);
+				break;
+			case QUIT:
+				running = false;
+				break;
+			case INFO:
+				infoCommand(Integer.parseInt(argument));
+				break;
+			case UNKNOWN:
+				break;
+			}
+		}
+		scanner.close();
+	}
+
+	/**
+	 * Reads in the readme file for instructions on the screen.
+	 */
+	private void help() {
+
+		File txtObject = new File("Help.txt");
+		Scanner reader = null;
+		String line = "";
+		try {
+			reader = new Scanner(txtObject);
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (Exception e) {
-			System.out.println("Caught exception:");
-			e.printStackTrace();
+		}
+		while (reader.hasNextLine()) {
+			System.out.println(reader.nextLine());
+
+		}
+	}
+
+	/**
+	 * Method for listing all customers.
+	 * 
+	 * @param libraryManager
+	 */
+	private void listCustomerCommand() {
+		for (Customer customer : this.customers) {
+			System.out.println(customer);
+		}
+	}
+
+	private void sortProductList(JavaLibrarySystem<E> libraryManager) {
+		Collections.sort(libraryManager.products);
+	}
+
+	private void sortCustomerList(JavaLibrarySystem<E> libraryManager) {
+		Collections.sort(libraryManager.customers);
+	}
+
+	/**
+	 * Lists all products in library.
+	 */
+	private void listProductsCommand() {
+		for (E prod : this.products) {
+			System.out.println(prod);
+		}
+	}
+
+	/**
+	 * Sets a specified product to borrowed by a specific customer who already
+	 * exists or gets created by user.
+	 * 
+	 * @param argument holds the productID to be checked out.
+	 */
+	private void checkOutCommand(String argument, JavaLibrarySystem<E> libraryManager) {
+		int productID = Integer.parseInt(argument);
+		boolean exists = false;
+		for (int i = 0; i < this.products.size(); i++) {
+			if (this.products.get(i).getArticleNumber() == productID) {
+				exists = true;
+				if (this.products.get(i).getBorrowedBy() != null) {
+					System.out.println("Cannot lend " + this.products.get(i).getProductName()
+							+ " to another customer. It is already borrowed by " + this.products.get(i).getBorrowedBy()
+							+ ".");
+					return;
+				}
+
+			}
+		}
+		if (exists) {
+			Scanner userReg = new Scanner(System.in);
+			String customerName;
+			String customerPhone;
+			int customerID;
+			Customer customer = null;
+			System.out.print("Checkout for? New customer (a) or Returning customer (b)\n> ");
+			String in = userReg.nextLine().toLowerCase();
+
+			if (in.equals("a")) {
+				System.out.print("Enter customer name:\n> ");
+				customerName = userReg.nextLine();
+				System.out.print("Enter customer phone number:\n> ");
+				customerPhone = userReg.nextLine();
+
+				// SET CUSTOMER ID
+				customerID = this.customers.size() + 1;
+				this.customers.add(new Customer(customerName, customerPhone, (customerID)));
+				for (int n = 0; n < this.customers.size(); n++) {
+					if (this.customers.get(n).getCustomerID() == customerID) {
+						customer = this.customers.get(n);
+					}
+				}
+			} else if (in.equals("b")) {
+				System.out.print("Enter customer ID:\n> ");
+				customerID = userReg.nextInt();
+				boolean customerExists = false;
+				for (int i = 0; i < this.customers.size(); i++) {
+					if (this.customers.get(i).getCustomerID() == customerID) {
+						customerName = this.customers.get(i).getName();
+						customerPhone = this.customers.get(i).getPhone();
+						customer = this.customers.get(i);
+						customerExists = true;
+					}
+					if (!customerExists) {
+						System.out.println("No such customerID");
+						return;
+					}
+				}
+			} else if (in != "a" && in != "b") {
+				System.out.println("Error! Enter a or b");
+				return;
+			}
+
+			for (int i = 0; i < this.products.size(); i++) {
+				if (this.products.get(i).getArticleNumber() == productID) {
+					this.products.get(i).setBorrowedBy(customer);
+					System.out.println("Succesfully lended " + this.products.get(i).getProductName() + " to "
+							+ this.products.get(i).getBorrowedBy() + ".");
+				}
+			}
+			sortCustomerList(libraryManager);
+			saveFile(libraryManager);
+		} else {
+			System.out.println("Product with article number " + productID + " doesn't exist.");
+			return;
+		}
+	}
+
+	/**
+	 * Lets a borrowed product be returned in stock.
+	 * 
+	 * @param argument holds productID for relevant product to be checke in.
+	 */
+	private void checkInCommand(String argument) {
+		int productID = Integer.parseInt(argument);
+		boolean exists = false;
+		for (int i = 0; i < this.products.size(); i++) {
+			if (this.products.get(i).getArticleNumber() == productID) {
+				exists = true;
+				if (this.products.get(i).getBorrowedBy() == null) {
+					System.out.println("Cannot return " + this.products.get(i).getProductName()
+							+ ". It is not borrowed by any customer.");
+					return;
+				} else {
+					Customer customer = this.products.get(i).getBorrowedBy();
+					this.products.get(i).setBorrowedBy(null);
+					System.out.println("Succesfully returned " + this.products.get(i).getProductName() + " from "
+							+ customer + ".");
+				}
+			}
+		}
+		if (!exists) {
+			System.out.println("Product with article number " + productID + " doesn't exist.");
+			return;
+		}
+	}
+
+	/**
+	 * Registers a new product.
+	 * 
+	 * @param libraryManager
+	 * 
+	 */
+	private void registerCommand(JavaLibrarySystem<E> libraryManager) {
+		Scanner userReg = new Scanner(System.in);
+		System.out.print("What do you want to register? Movie (a), Book (b)\n> ");
+		String in = userReg.nextLine().toLowerCase();
+		if (in.equals("a")) {
+			System.out.print("Enter product ID:\n> ");
+			int productID;
+			try {
+				productID = userReg.nextInt();
+			} catch (InputMismatchException e) {
+				System.out.println("Not a number!");
+				return;
+			}
+			while (!isUniqueID(productID)) {
+				System.out.print("Error: product with ID already exists. Enter unique product ID:\n> ");
+				productID = userReg.nextInt();
+			}
+
+			userReg.nextLine();
+			System.out.print("Enter title:\n> ");
+			String title = userReg.nextLine();
+			System.out.print("Enter value:\n> ");
+			double value;
+			try {
+				value = userReg.nextDouble();
+			} catch (InputMismatchException e) {
+				System.out.println("Not a number!");
+				return;
+			}
+			userReg.nextLine();
+			System.out.print("Enter running time:\n> ");
+			int runningTime;
+			try {
+				runningTime = userReg.nextInt();
+			} catch (InputMismatchException e) {
+				System.out.println("Not a number!");
+				return;
+			}
+			userReg.nextLine();
+			System.out.print("Enter imdbRating:\n> ");
+			float imdbRating;
+			try {
+				imdbRating = userReg.nextFloat();
+			} catch (InputMismatchException e) {
+				System.out.println("Not a number!");
+				return;
+			}
+			this.products.add((E) new Movie(productID, title, runningTime, imdbRating, "Movie", value));
+			System.out.println("Successfully registered " + title + "!");
+
+		} else if (in.equals("b")) {
+			System.out.print("Enter product ID:\n> ");
+			int productID;
+			try {
+				productID = userReg.nextInt();
+			} catch (InputMismatchException e) {
+				System.out.println("Not a number!");
+				return;
+			}
+			while (!isUniqueID(productID)) {
+				System.out.print("ID already exists. Enter unique product ID:\n> ");
+				productID = userReg.nextInt();
+			}
+			userReg.nextLine();
+			System.out.print("Enter title:\n> ");
+			String title = userReg.nextLine();
+			System.out.print("Enter value:\n> ");
+			double value;
+			try {
+				value = userReg.nextDouble();
+			} catch (InputMismatchException e) {
+				System.out.println("Not a number!");
+				return;
+			}
+			userReg.nextLine();
+			System.out.print("Enter number of pages:\n> ");
+			int numberOfPages;
+			try {
+				numberOfPages = userReg.nextInt();
+			} catch (InputMismatchException e) {
+				System.out.println("Not a number! ");
+				return;
+			}
+			userReg.nextLine();
+			System.out.print("Enter publisher:\n> ");
+			String publisher = userReg.nextLine();
+			this.products.add((E) new Book(productID, title, numberOfPages, publisher, "Book", value));
+			System.out.println("Successfully registered " + title + "!");
+		} else {
+			System.out.println("Try again!");
+		}
+		sortProductList(libraryManager);
+		saveFile(libraryManager);
+
+	}
+
+	/**
+	 * Decides if the productID is unique.
+	 * 
+	 * @param productID holds the productID to be compared to existing productID's.
+	 * @return true or false.
+	 */
+	private boolean isUniqueID(int productID) {
+		boolean unique = true;
+		for (int i = 0; i < this.products.size(); i++) {
+			if (this.products.get(i).getArticleNumber() == productID) {
+				unique = false;
+			}
+		}
+		return unique;
+	}
+
+	/**
+	 * Deletes a product from library.
+	 * 
+	 * @param argument       holds the productID of product to be deleted.
+	 * @param libraryManager
+	 */
+	private void deRegisterCommand(String argument, JavaLibrarySystem<E> libraryManager) {
+		try {
+			int productID = Integer.parseInt(argument);
+
+			for (int i = 0; i < this.products.size(); i++) {
+				if (this.products.get(i).getArticleNumber() == productID) {
+					if (this.products.get(i).getBorrowedBy() != null) {
+						System.out.println("Cannot delete " + this.products.get(i).getProductName()
+								+ ". It is borrowed by \" + this.products.get(i).getBorrowedBy()\r\n" + ".");
+						return;
+					} else {
+						this.products.remove(i);
+					}
+				}
+			}
+		} catch (NumberFormatException e) {
+			System.out.println("Error. Enter deregister and articlenumber. Try again");
+
+		}
+		sortProductList(libraryManager);
+		saveFile(libraryManager);
+	}
+
+	/**
+	 * Prints all products in the library.
+	 * 
+	 * @param productID holds the productID to be compared to existing productID's.
+	 */
+	private void infoCommand(int productID) {
+		boolean noSuchProductID = true;
+		for (int i = 0; i < this.products.size(); i++) {
+			Product.showInfo = true;
+
+			if (this.products.get(i).getArticleNumber() == productID) {
+				System.out.println(this.products.get(i));
+				noSuchProductID = false;
+				Product.showInfo = false;
+			}
+		}
+		if (noSuchProductID) {
+			System.out.println("No product with id " + productID + " registered.");
 		}
 	}
 
@@ -164,395 +578,25 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	}
 
 	/**
-	 * The method that handles the runtime part of the program. All commands are
-	 * entered through this UI.
+	 * Saves all to a .bin file.
 	 * 
+	 * @param libraryManager The JavaLibrarySystem object is passed to the method in
+	 *                       order to save it to the bin file.
 	 */
-	public void runSystem(JavaLibrarySystem<E> libraryManager) {
-
-		listProductsCommand();
-
-		boolean running = true;
-		Scanner scanner = new Scanner(System.in);
-
-		while (running) {
-			System.out.print("\nEnter command\n> ");
-			String userInput = scanner.nextLine();
-			Command command = parseCommand(userInput);
-
-			if (command == Command.UNKNOWN) {
-				System.out.println("Unknown command. Try again");
-				continue;
-			}
-
-			String argument = parseArguments(userInput);
-
-			switch (command) {
-			case LIST:
-				listProductsCommand();
-				break;
-			case HELP:
-				help();
-				break;
-			case CUSTOMERS:
-				listCustomerCommand();
-				break;
-			case CHECKOUT:
-				try {
-					checkOutCommand(argument, libraryManager);
-				} catch (Exception e) {
-					System.out.println("IO Exception");
-					e.printStackTrace();
-				}
-				break;
-			case CHECKIN:
-				checkInCommand(argument);
-				break;
-			case REGISTER:
-				try {
-					registerCommand(libraryManager);
-				} catch (Exception e) {
-					System.out.println("IO Exception");
-					e.printStackTrace();
-				}
-				break;
-			case DEREGISTER:
-				deRegisterCommand(argument, libraryManager);
-				break;
-			case QUIT:
-				running = false;
-				break;
-			case INFO:
-				infoCommand(Integer.parseInt(argument));
-				break;
-			case UNKNOWN:
-				break;
-			}
-
-		}
-
-		scanner.close();
-
-	}
-
-	/**
-	 * Reads in the readmefile for instructions on the screen.
-	 */
-	private void help() {
-
-		File txtObject = new File("Help.txt");
-		Scanner reader = null;
-		String line = "";
+	private static void saveFile(JavaLibrarySystem libraryManager) {
 		try {
-			reader = new Scanner(txtObject);
-		} catch (FileNotFoundException e) {
+			FileOutputStream fos = null;
+			fos = new FileOutputStream(FILE_PATH);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(libraryManager);
+			oos.close();
+		} catch (IOException e) {
+			System.out.println("Caught exception:");
+			e.printStackTrace();
+		} catch (Exception e) {
+			System.out.println("Caught exception:");
 			e.printStackTrace();
 		}
-		while (reader.hasNextLine()) {
-			System.out.println(reader.nextLine());
-
-		}
-	}
-
-	/**
-	 * Method for listing all customers.
-	 * 
-	 * @param libraryManager
-	 */
-	private void listCustomerCommand() {
-		for (Customer customer : this.customers) {
-			System.out.println(customer);
-		}
-	}
-
-	private void sortProductList(JavaLibrarySystem<E> libraryManager) {
-		Collections.sort(libraryManager.products);
-	}
-
-	private void sortCustomerList(JavaLibrarySystem<E> libraryManager) {
-		Collections.sort(libraryManager.customers);
-	}
-
-	/**
-	 * Parse arguments in entered data.
-	 * 
-	 * @param userInput data to be parsed.
-	 * @return parsed arguments to be passed to a method.
-	 */
-	private String parseArguments(String userInput) {
-
-		String[] commandAndArguments = userInput.split(" ");
-		String args = "";
-		if (commandAndArguments.length > 1) {
-			try {
-				args = commandAndArguments[1];
-			} catch (ArrayIndexOutOfBoundsException e) {
-				System.out.println("Array out of bounds. Too many argumnets after command");
-			}
-		}
-
-		return args;
-	}
-
-	/**
-	 * Lists all products in library.
-	 */
-	private void listProductsCommand() {
-		for (E prod : this.products) {
-			System.out.println(prod);
-		}
-	}
-
-	/**
-	 * Sets a specified product to borrowed by a specific customer who already
-	 * exists or gets created by user.
-	 * 
-	 * @param argument holds the productID to be checked out.
-	 */
-	private void checkOutCommand(String argument, JavaLibrarySystem<E> libraryManager) {
-		int productID = Integer.parseInt(argument);
-
-		for (int i = 0; i < this.products.size(); i++) {
-			if (this.products.get(i).getArticleNumber() == productID) {
-				if (this.products.get(i).getBorrowedBy() != null) {
-					System.out.println("Cannot lend " + this.products.get(i).getProductName()
-							+ " to another customer. It is already borrowed by " + this.products.get(i).getBorrowedBy()
-							+ ".");
-					return;
-				}
-			}
-		}
-
-		Scanner userReg = new Scanner(System.in);
-		String customerName;
-		String customerPhone;
-		int customerID;
-		Customer customer = null;
-		System.out.print("Checkpout for? New customer (a) or Returning customer (b)\n> ");
-		String in = userReg.nextLine().toLowerCase();
-		if (in.equals("a")) {
-			System.out.print("Enter customer name:\n> ");
-			customerName = userReg.nextLine();
-			System.out.print("Enter customer phone number:\n> ");
-			customerPhone = userReg.nextLine();
-
-			// SET CUSTOMER ID
-			customerID = this.customers.size() + 1;
-			this.customers.add(new Customer(customerName, customerPhone, (customerID)));
-			for (int n = 0; n < this.customers.size(); n++) {
-				if (this.customers.get(n).getCustomerID() == customerID) {
-					customer = this.customers.get(n);
-				}
-			}
-		}
-		if (in.equals("b")) {
-			System.out.print("Enter customer ID:\n> ");
-			customerID = userReg.nextInt();
-
-			for (int i = 0; i < this.customers.size(); i++) {
-				if (this.customers.get(i).getCustomerID() == customerID) {
-					customerName = this.customers.get(i).getName();
-					customerPhone = this.customers.get(i).getPhone();
-					customer = this.customers.get(i);
-				} else {
-					System.out.println("No such customerID");
-				}
-			}
-		}
-
-		for (int i = 0; i < this.products.size(); i++) {
-			if (this.products.get(i).getArticleNumber() == productID) {
-				this.products.get(i).setBorrowedBy(customer);
-				System.out.println("Succesfully lended " + this.products.get(i).getProductName() + " to "
-						+ this.products.get(i).getBorrowedBy() + ".");
-			}
-		}
-		sortCustomerList(libraryManager);
-		saveFile(libraryManager);
-	}
-
-	/**
-	 * Lets a borrowed product be returned in stock.
-	 * 
-	 * @param argument holds productID for relevant product to be checke in.
-	 */
-	private void checkInCommand(String argument) {
-		int productID = Integer.parseInt(argument);
-
-		for (int i = 0; i < this.products.size(); i++) {
-			if (this.products.get(i).getArticleNumber() == productID) {
-				if (this.products.get(i).getBorrowedBy() == null) {
-					System.out.println("Cannot return " + this.products.get(i).getProductName()
-							+ ". It is not borrowed by any customer.");
-					return;
-				} else {
-					Customer customer = this.products.get(i).getBorrowedBy();
-					this.products.get(i).setBorrowedBy(null);
-					System.out.println("Succesfully returned " + this.products.get(i).getProductName() + " from "
-							+ customer + ".");
-				}
-			}
-		}
-	}
-
-	/**
-	 * Registers a new product.
-	 * 
-	 * @param libraryManager
-	 * 
-	 */
-	private void registerCommand(JavaLibrarySystem<E> libraryManager) {
-		Scanner userReg = new Scanner(System.in);
-		System.out.print("What do you want to register? Movie (a), Book (b)\n> ");
-		/* bygger vidare på det nu */
-		String in = userReg.nextLine().toLowerCase();
-		if (in.equals("a")) {
-			System.out.print("Enter product ID:\n> ");
-			int productID = userReg.nextInt();
-			while (!isUniqueID(productID)) {
-				System.out.print("Error: product with ID already exists. Enter unique product ID:\n> ");
-				productID = userReg.nextInt();
-			}
-
-			userReg.nextLine();
-			System.out.print("Enter title:\n> ");
-			String title = userReg.nextLine();
-			System.out.print("Enter value:\n> ");
-			double value = userReg.nextDouble();
-			userReg.nextLine();
-			System.out.print("Enter running time:\n> ");
-			int runningTime = userReg.nextInt();
-			userReg.nextLine();
-			System.out.print("Enter imdbRating:\n> ");
-			float imdbRating = userReg.nextFloat();
-			this.products.add((E) new Movie(productID, title, runningTime, imdbRating, "Movie", value));
-			System.out.println("Successfully registered " + title + "!");
-
-		} else if (in.equals("b")) {
-			System.out.print("Enter product ID:\n> ");
-			int productID = userReg.nextInt();
-			while (!isUniqueID(productID)) {
-				System.out.print("ID already exists. Enter unique product ID:\n> ");
-				productID = userReg.nextInt();
-			}
-			userReg.nextLine();
-			System.out.print("Enter title:\n> ");
-			String title = userReg.nextLine();
-			System.out.print("Enter value:\n> ");
-			double value = userReg.nextDouble();
-			userReg.nextLine();
-			System.out.print("Enter number of pages:\n> ");
-			int numberOfPages = userReg.nextInt();
-			userReg.nextLine();
-			System.out.print("Enter publisher:\n> ");
-			String publisher = userReg.nextLine();
-			this.products.add((E) new Book(productID, title, numberOfPages, publisher, "Book", value));
-			System.out.println("Successfully registered " + title + "!");
-		} else {
-			System.out.println("Try again!");
-		}
-		sortProductList(libraryManager);
-		saveFile(libraryManager);
-
-	}
-
-	/**
-	 * Decides if the productID is unique.
-	 * 
-	 * @param productID holds the productID to be compared to existing productID's.
-	 * @return true or false.
-	 */
-	private boolean isUniqueID(int productID) {
-		boolean unique = true;
-		for (int i = 0; i < this.products.size(); i++) {
-			if (this.products.get(i).getArticleNumber() == productID) {
-				unique = false;
-			}
-		}
-		return unique;
-	}
-
-	/**
-	 * Deletes a product from library.
-	 * 
-	 * @param argument holds the productID of product to be deleted.
-	 * @param libraryManager
-	 */
-	private void deRegisterCommand(String argument, JavaLibrarySystem<E> libraryManager) {
-		try {
-			int productID = Integer.parseInt(argument);
-
-			for (int i = 0; i < this.products.size(); i++) {
-				if (this.products.get(i).getArticleNumber() == productID) {
-					if (this.products.get(i).getBorrowedBy() != null) {
-						System.out.println("Cannot delete " + this.products.get(i).getProductName()
-								+ ". It is borrowed by \" + this.products.get(i).getBorrowedBy()\r\n" + ".");
-						return;
-					} else {
-						this.products.remove(i);
-					}
-				}
-			}
-		} catch (NumberFormatException e) {
-			System.out.println("Error. Enter deregister and articlenumber. Try again");
-
-		}
-		sortProductList(libraryManager);
-		saveFile(libraryManager);
-	}
-
-	/**
-	 * Prints all products in the library.
-	 * 
-	 * @param productID holds the productID to be compared to existing productID's.
-	 */
-	private void infoCommand(int productID) {
-		boolean noSuchProductID = true;
-		for (int i = 0; i < this.products.size(); i++) {
-			Product.showInfo = true;
-
-			if (this.products.get(i).getArticleNumber() == productID) {
-				System.out.println(this.products.get(i));
-				noSuchProductID = false;
-				Product.showInfo = false;
-			}
-		}
-		if (noSuchProductID) {
-			System.out.println("No product with id " + productID + " registered.");
-		}
-	}
-
-	/**
-	 * Parse command in entered data.
-	 * 
-	 * @param userInput entered data to be parsed.
-	 * @return parsed command to be passed to switch.
-	 */
-	private Command parseCommand(String userInput) {
-		String commandString = userInput.split(" ")[0].toLowerCase();
-		switch (commandString) {
-		case "list":
-			return Command.LIST;
-		case "help":
-			return Command.HELP; // Added function for printing out instructions for the program.
-		case "customers":
-			return Command.CUSTOMERS; // Added function for retrieving list of customers.
-		case "checkout":
-			return Command.CHECKOUT;
-		case "checkin":
-			return Command.CHECKIN;
-		case "register":
-			return Command.REGISTER;
-		case "deregister":
-			return Command.DEREGISTER;
-		case "info":
-			return Command.INFO;
-		case "quit":
-			return Command.QUIT;
-		default:
-			return Command.UNKNOWN;
-		}
-
 	}
 
 }

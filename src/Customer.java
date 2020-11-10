@@ -1,6 +1,10 @@
 import java.io.Serializable;
 
 public class Customer implements Comparable<Customer>, Serializable {
+	/**
+	 * Serialversion.
+	 */
+	private static final long serialVersionUID = 1L;
 	private String name;
 	private String phone;
 	private int customerID;

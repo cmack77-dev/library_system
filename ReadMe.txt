@@ -1,5 +1,3 @@
-# lib_sys
-
 Files needed to build:
 
 JavaLibrarySystem.java	(main program)
@@ -26,7 +24,7 @@ list		no arguments		Prints article number, title and if in stock or borrowed for
 help		no arguments		Prints a help screen with all available commands.
 Customers	no arguments		Lists all customers sorted by article number.
 checkout	<articleNumber>		Dialogue where you choose if product is to be borrowed by new or existing customer. 
-								If new enter name and phone number. If existing enter customerID. 
+								If new:  enter name and phone number. If existing: enter customerID. 
 								Sets the product with <articleNumber> to borrowed to entered customer. 
 								After this the product is set to borrowed and no longer in stock.
 checkin		<articleNumber>		Puts a borrowed product with <articleNumber> back in stock. 

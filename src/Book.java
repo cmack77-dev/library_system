@@ -1,6 +1,10 @@
 import java.io.Serializable;
 
 public class Book extends Product implements Serializable {
+	/**
+	 * Serialversion.
+	 */
+	private static final long serialVersionUID = 1L;
 	private int pages;
 	private String publisher;
 
