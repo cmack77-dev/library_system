@@ -1,6 +1,7 @@
 import java.io.Serializable;
 
 abstract class Product implements Comparable<Product>, Serializable {
+	private static final long serialVersionUID = 1L;
 	private int articleNumber;
 	private String productName;
 	private Customer borrowedBy = null;
