@@ -19,6 +19,11 @@ import java.util.*;
 public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	/**
+	 * Serialversion.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Holds a list of all books and movies. Initialized from bin file and saved
 	 * when system exits.
 	 */
@@ -63,7 +68,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		// SAVE BIN FILE AT THE END OF THE PROGRAM.
 		saveFile(libraryManager);
 
-		System.out.println("Exiting library.");
+		System.out.println("Good bye!");
 		System.exit(0);
 	}
 
@@ -98,6 +103,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			FileInputStream fis = new FileInputStream(FILE_PATH);
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			libraryManager = (JavaLibrarySystem) ois.readObject();
+			System.out.println("Successfully initialized system state from file(s).\n");
 			System.out.println("Current inventory:");
 			ois.close();
 			return libraryManager;
@@ -111,6 +117,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * entered through this UI.
 	 * 
 	 * @throws IOException
+	 * 
 	 */
 	public void runSystem(JavaLibrarySystem<E> libraryManager) throws IOException {
 
@@ -139,22 +146,16 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				listCustomerCommand();
 				break;
 			case CHECKOUT:
-				checkOutCommand(argument);
-				sortCustomerList(libraryManager);
-				saveFile(libraryManager);
+				checkOutCommand(argument, libraryManager);
 				break;
 			case CHECKIN:
 				checkInCommand(argument);
 				break;
 			case REGISTER:
-				registerCommand();
-				sortProductList(libraryManager);
-				saveFile(libraryManager);
+				registerCommand(libraryManager);
 				break;
 			case DEREGISTER:
-				deRegisterCommand(argument);
-				sortProductList(libraryManager);
-				saveFile(libraryManager);
+				deRegisterCommand(argument, libraryManager);
 				break;
 			case QUIT:
 				running = false;
@@ -225,9 +226,11 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * Sets a specified product to borrowed by a specific customer who already
 	 * exists or gets created by user.
 	 * 
-	 * @param argument holds the productID to be checked out.
+	 * @param argument       holds the productID to be checked out.
+	 * @param libraryManager
+	 * @throws IOException
 	 */
-	private void checkOutCommand(String argument) {
+	private void checkOutCommand(String argument, JavaLibrarySystem<E> libraryManager) throws IOException {
 		int productID = Integer.parseInt(argument);
 
 		for (int i = 0; i < this.products.size(); i++) {
@@ -246,12 +249,12 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		String customerPhone;
 		int customerID;
 		Customer customer = null;
-		System.out.println("Checkpout for? New customer (a) or Returning customer (b)");
+		System.out.print("Checkpout for? New customer (a) or Returning customer (b)\n> ");
 		String in = userReg.nextLine().toLowerCase();
 		if (in.equals("a")) {
-			System.out.println("Enter customer name:");
+			System.out.print("Enter customer name:\n> ");
 			customerName = userReg.nextLine();
-			System.out.println("Enter customer phone number:");
+			System.out.print("Enter customer phone number:\n> ");
 			customerPhone = userReg.nextLine();
 
 			// SET CUSTOMER ID
@@ -264,7 +267,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			}
 		}
 		if (in.equals("b")) {
-			System.out.println("Enter customer ID:");
+			System.out.print("Enter customer ID:\n> ");
 			customerID = userReg.nextInt();
 
 			for (int i = 0; i < this.customers.size(); i++) {
@@ -285,8 +288,9 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 						+ this.products.get(i).getBorrowedBy() + ".");
 			}
 		}
-		userReg.close();
-
+//		userReg.close();
+		sortCustomerList(libraryManager);
+		saveFile(libraryManager);
 	}
 
 	/**
@@ -315,8 +319,11 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	/**
 	 * Registers a new product.
+	 * 
+	 * @param libraryManager
+	 * @throws IOException
 	 */
-	private void registerCommand() {
+	private void registerCommand(JavaLibrarySystem<E> libraryManager) throws IOException {
 		Scanner userReg = new Scanner(System.in);
 		System.out.print("What do you want to register? Movie (a), Book (b)\n> ");
 		/* bygger vidare på det nu */
@@ -341,6 +348,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			System.out.print("Enter imdbRating:\n> ");
 			float imdbRating = userReg.nextFloat();
 			this.products.add((E) new Movie(productID, title, runningTime, imdbRating, "Movie", value));
+			System.out.println("Successfully registered " + title + "!");
+
 		} else if (in.equals("b")) {
 			System.out.print("Enter product ID:\n> ");
 			int productID = userReg.nextInt();
@@ -360,9 +369,12 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			System.out.print("Enter publisher:\n> ");
 			String publisher = userReg.nextLine();
 			this.products.add((E) new Book(productID, title, numberOfPages, publisher, "Book", value));
+			System.out.println("Successfully registered " + title + "!");
 		} else {
 			System.out.println("Try again!");
 		}
+		sortProductList(libraryManager);
+		saveFile(libraryManager);
 
 	}
 
@@ -387,8 +399,10 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * 
 	 * @param argument       holds the productID of product to be deleted.
 	 * @param libraryManager
+	 * @param libraryManager
+	 * @throws IOException
 	 */
-	private void deRegisterCommand(String argument) {
+	private void deRegisterCommand(String argument, JavaLibrarySystem<E> libraryManager) throws IOException {
 		int productID = Integer.parseInt(argument);
 
 		for (int i = 0; i < this.products.size(); i++) {
@@ -398,10 +412,15 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 							+ ". It is borrowed by \" + this.products.get(i).getBorrowedBy()\r\n" + ".");
 					return;
 				} else {
+					String title=this.products.get(i).getProductName();
 					this.products.remove(i);
+					System.out.println("Successfully deregistered " + title + "!");
+
 				}
 			}
 		}
+		sortProductList(libraryManager);
+		saveFile(libraryManager);
 	}
 
 	/**
