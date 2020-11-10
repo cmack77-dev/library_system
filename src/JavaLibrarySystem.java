@@ -50,8 +50,6 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	/**
 	 * Main function. Initializes system.
 	 * 
-	 * @throws IOException
-	 * 
 	 */
 	public static void main(String[] args) {
 		System.out.println("Welcome!");

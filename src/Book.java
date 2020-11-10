@@ -46,7 +46,6 @@ public class Book extends Product implements Serializable {
 	 * Shows registered information from Book or if Book is in stock through getters.
 	 * Returns information if Book is Borrowed and if so by whom.
 	 */
-
 	@Override
 	public String toString() {
 		String s;
