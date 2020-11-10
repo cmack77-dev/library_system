@@ -12,7 +12,7 @@ Help.txt
 
 Other relevant files included in project:
 
-README.md
+README.txt
 UML library system.mdj
 
 
