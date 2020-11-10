@@ -8,6 +8,13 @@ public class Movie extends Product implements Serializable {
 	private int runningTime;
 	private float imdbRating;
 
+	/**
+	 * Constructor for Movie which extends Product.
+	 * 
+	 * @param runningTime Sets running time for Movie.
+	 * @param imdbRating  Sets rating for Movie.
+	 * super gets variables from Product through inheritance.
+	 */
 	public Movie(int articleNumber, String productName, int runningTime, float imdbRating, String type, double value) {
 		super(articleNumber, productName, type, value);
 		this.runningTime = runningTime;
@@ -30,6 +37,12 @@ public class Movie extends Product implements Serializable {
 		this.imdbRating = imdbRating;
 	}
 
+	
+	/**
+	 * Gets type from Product to identify Book or Movie and sets values to String.
+	 * Shows registered information from Movie or if Movie is in stock through getters.
+	 * Returns information if Movie is Borrowed and if so by whom.
+	 */
 	@Override
 	public String toString() {
 		String s;

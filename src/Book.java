@@ -8,6 +8,13 @@ public class Book extends Product implements Serializable {
 	private int pages;
 	private String publisher;
 
+	/**
+	 * Constructor for Book which extends Product.
+	 * 
+	 * @param pages     Sets amount of pages for Book.
+	 * @param publisher Sets who the publisher is for Book.
+	 * super gets variables from Product through inheritance.
+	 */
 	public Book(int articleNumber, String productName, int pages, String publisher, String type, double value) {
 		super(articleNumber, productName, type, value);
 		this.pages = pages;
@@ -29,11 +36,17 @@ public class Book extends Product implements Serializable {
 	public void setPublisher(String publisher) {
 		this.publisher = publisher;
 	}
+	
+	/**
+	 * Gets type from Product to identify Book or Movie and sets values to String.
+	 * Shows registered information from Book or if Book is in stock through getters.
+	 * Returns information if Book is Borrowed and if so by whom.
+	 */
 
 	@Override
 	public String toString() {
 		String s;
-		if (!showInfo) {
+		if (!showInfo) {		
 			s = getArticleNumber() + " (" + getType() + "): " + getProductName() + ".";
 			if (getBorrowedBy() != null) {
 				s += "\n\tBorrowed by: " + getBorrowedBy();
