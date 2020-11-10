@@ -13,6 +13,10 @@ public class Movie extends Product implements Serializable {
 	 * 
 	 * @param runningTime Sets running time for Movie.
 	 * @param imdbRating  Sets rating for Movie.
+	 * @param articleNumber Gets article number for Book.
+	 * @param productName   Gets product name for Book.
+	 * @param type          Gets type for Product.
+	 * @param value         Gets value for Product.
 	 * super gets variables from Product through inheritance.
 	 */
 	public Movie(int articleNumber, String productName, int runningTime, float imdbRating, String type, double value) {

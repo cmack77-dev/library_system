@@ -87,7 +87,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @param userInput entered data to be parsed.
 	 * @return parsed command to be passed to switch.
 	 */
-	private Command parseCommand(String userInput) {
+	public Command parseCommand(String userInput) {
 		String commandString = userInput.split(" ")[0].toLowerCase();
 		switch (commandString) {
 		case "list":
@@ -119,7 +119,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @param userInput data to be parsed.
 	 * @return parsed arguments to be passed to a method.
 	 */
-	private String parseArguments(String userInput) {
+	public String parseArguments(String userInput) {
 		String[] commandAndArguments = userInput.split(" ");
 		String args = "";
 
@@ -166,7 +166,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				try {
 					checkOutCommand(argument, libraryManager);
 				} catch (Exception e) {
-					System.out.println("IO Exception");
+					System.out.println("IO Exception:");
 					e.printStackTrace();
 				}
 				break;
@@ -177,7 +177,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				try {
 					registerCommand(libraryManager);
 				} catch (Exception e) {
-					System.out.println("IO Exception");
+					System.out.println("IO Exception:");
 					e.printStackTrace();
 				}
 				break;
@@ -200,7 +200,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	/**
 	 * Reads in the readme file for instructions on the screen.
 	 */
-	private void help() {
+	public void help() {
 
 		File txtObject = new File("Help.txt");
 		Scanner reader = null;
@@ -208,6 +208,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		try {
 			reader = new Scanner(txtObject);
 		} catch (FileNotFoundException e) {
+			System.out.println("Error: File not found");
 			e.printStackTrace();
 		}
 		while (reader.hasNextLine()) {
@@ -221,24 +222,24 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * 
 	 * @param libraryManager
 	 */
-	private void listCustomerCommand() {
+	public void listCustomerCommand() {
 		for (Customer customer : this.customers) {
 			System.out.println(customer);
 		}
 	}
 
-	private void sortProductList(JavaLibrarySystem<E> libraryManager) {
+	public void sortProductList(JavaLibrarySystem<E> libraryManager) {
 		Collections.sort(libraryManager.products);
 	}
 
-	private void sortCustomerList(JavaLibrarySystem<E> libraryManager) {
+	public void sortCustomerList(JavaLibrarySystem<E> libraryManager) {
 		Collections.sort(libraryManager.customers);
 	}
 
 	/**
 	 * Lists all products in library.
 	 */
-	private void listProductsCommand() {
+	public void listProductsCommand() {
 		for (E prod : this.products) {
 			System.out.println(prod);
 		}
@@ -250,7 +251,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * 
 	 * @param argument holds the productID to be checked out.
 	 */
-	private void checkOutCommand(String argument, JavaLibrarySystem<E> libraryManager) {
+	public void checkOutCommand(String argument, JavaLibrarySystem<E> libraryManager) {
 		int productID = Integer.parseInt(argument);
 		boolean exists = false;
 		for (int i = 0; i < this.products.size(); i++) {
@@ -329,7 +330,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * 
 	 * @param argument holds productID for relevant product to be checke in.
 	 */
-	private void checkInCommand(String argument) {
+	public void checkInCommand(String argument) {
 		int productID = Integer.parseInt(argument);
 		boolean exists = false;
 		for (int i = 0; i < this.products.size(); i++) {
@@ -359,17 +360,18 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @param libraryManager
 	 * 
 	 */
-	private void registerCommand(JavaLibrarySystem<E> libraryManager) {
+	public void registerCommand(JavaLibrarySystem<E> libraryManager) {
 		Scanner userReg = new Scanner(System.in);
 		System.out.print("What do you want to register? Movie (a), Book (b)\n> ");
 		String in = userReg.nextLine().toLowerCase();
 		if (in.equals("a")) {
-			System.out.print("Enter product ID:\n> ");
+			System.out.print("Enter product ID (numbers) :\n> ");
 			int productID;
 			try {
 				productID = userReg.nextInt();
 			} catch (InputMismatchException e) {
-				System.out.println("Not a number!");
+				System.out.println("Error: Product ID should only contain numbers. Try again!");
+				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			while (!isUniqueID(productID)) {
@@ -380,42 +382,46 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			userReg.nextLine();
 			System.out.print("Enter title:\n> ");
 			String title = userReg.nextLine();
-			System.out.print("Enter value:\n> ");
+			System.out.print("Enter value (numbers) :\n> ");
 			double value;
 			try {
 				value = userReg.nextDouble();
 			} catch (InputMismatchException e) {
-				System.out.println("Not a number!");
+				System.out.println("Error: Value should only contain numbers (price). Try again!");
+				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			userReg.nextLine();
-			System.out.print("Enter running time:\n> ");
+			System.out.print("Enter running time (minutes) :\n> ");
 			int runningTime;
 			try {
 				runningTime = userReg.nextInt();
 			} catch (InputMismatchException e) {
-				System.out.println("Not a number!");
+				System.out.println("Error: Running time should only contain numbers (minutes). Try again!");
+				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			userReg.nextLine();
-			System.out.print("Enter imdbRating:\n> ");
+			System.out.print("Enter imdbRating (numbers) :\n> ");
 			float imdbRating;
 			try {
 				imdbRating = userReg.nextFloat();
 			} catch (InputMismatchException e) {
-				System.out.println("Not a number!");
+				System.out.println("Error: Rating should only contain numbers. Try again!");
+				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			this.products.add((E) new Movie(productID, title, runningTime, imdbRating, "Movie", value));
 			System.out.println("Successfully registered " + title + "!");
 
 		} else if (in.equals("b")) {
-			System.out.print("Enter product ID:\n> ");
+			System.out.print("Enter product ID (numbers) :\n> ");
 			int productID;
 			try {
 				productID = userReg.nextInt();
 			} catch (InputMismatchException e) {
-				System.out.println("Not a number!");
+				System.out.println("Error: Product ID should only contain numbers. Try again!");
+				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			while (!isUniqueID(productID)) {
@@ -425,12 +431,13 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			userReg.nextLine();
 			System.out.print("Enter title:\n> ");
 			String title = userReg.nextLine();
-			System.out.print("Enter value:\n> ");
+			System.out.print("Enter value (numbers) :\n> ");
 			double value;
 			try {
 				value = userReg.nextDouble();
 			} catch (InputMismatchException e) {
-				System.out.println("Not a number!");
+				System.out.println("Error: Value should only contain numbers (price). Try again!");
+				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			userReg.nextLine();
@@ -439,7 +446,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			try {
 				numberOfPages = userReg.nextInt();
 			} catch (InputMismatchException e) {
-				System.out.println("Not a number! ");
+				System.out.println("Error: Pages should only contain numbers. Try again!");
+				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			userReg.nextLine();
@@ -461,7 +469,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @param productID holds the productID to be compared to existing productID's.
 	 * @return true or false.
 	 */
-	private boolean isUniqueID(int productID) {
+	public boolean isUniqueID(int productID) {
 		boolean unique = true;
 		for (int i = 0; i < this.products.size(); i++) {
 			if (this.products.get(i).getArticleNumber() == productID) {
@@ -477,7 +485,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @param argument       holds the productID of product to be deleted.
 	 * @param libraryManager
 	 */
-	private void deRegisterCommand(String argument, JavaLibrarySystem<E> libraryManager) {
+	public void deRegisterCommand(String argument, JavaLibrarySystem<E> libraryManager) {
 		try {
 			int productID = Integer.parseInt(argument);
 
@@ -493,7 +501,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				}
 			}
 		} catch (NumberFormatException e) {
-			System.out.println("Error. Enter deregister and articlenumber. Try again");
+			System.out.println("Error. Enter deregister and an articlenumber. Try again");
 
 		}
 		sortProductList(libraryManager);
@@ -505,7 +513,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * 
 	 * @param productID holds the productID to be compared to existing productID's.
 	 */
-	private void infoCommand(int productID) {
+	public void infoCommand(int productID) {
 		boolean noSuchProductID = true;
 		for (int i = 0; i < this.products.size(); i++) {
 			Product.showInfo = true;
@@ -530,7 +538,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	private static JavaLibrarySystem readFile(JavaLibrarySystem libraryManager) {
+	public static JavaLibrarySystem readFile(JavaLibrarySystem libraryManager) {
 
 		File file = new File(FILE_PATH);
 		if (file.exists()) {
@@ -539,26 +547,23 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			try {
 				fis = new FileInputStream(FILE_PATH);
 			} catch (FileNotFoundException e1) {
-				System.out.println("Exception caught: Filepath incorrect");
+				System.out.println("Exception caught: File path incorrect");
 				e1.printStackTrace();
 			}
 
 			try {
 				ois = new ObjectInputStream(fis);
 			} catch (IOException e1) {
-				System.out.println("Exception caught:");
+				System.out.println("Exception caught, printing error:");
 				e1.printStackTrace();
 			}
 			try {
 				libraryManager = (JavaLibrarySystem) ois.readObject();
 			} catch (ClassNotFoundException e) {
-				System.out.println("Exception caught:");
+				System.out.println("Exception caught: Class is missing or corrupt");
 				e.printStackTrace();
 			} catch (IOException e) {
-				System.out.println("Exception caught:");
-				e.printStackTrace();
-			} catch (Exception e) {
-				System.out.println("Exception caught:");
+				System.out.println("Exception caught, printing error:");
 				e.printStackTrace();
 			}
 
@@ -566,7 +571,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			try {
 				ois.close();
 			} catch (IOException e) {
-				System.out.println("Exception caught:");
+				System.out.println("Exception caught, printing error:");
 				e.printStackTrace();
 			}
 			return libraryManager;
@@ -583,7 +588,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @param libraryManager The JavaLibrarySystem object is passed to the method in
 	 *                       order to save it to the bin file.
 	 */
-	private static void saveFile(JavaLibrarySystem libraryManager) {
+	public static void saveFile(JavaLibrarySystem libraryManager) {
 		try {
 			FileOutputStream fos = null;
 			fos = new FileOutputStream(FILE_PATH);

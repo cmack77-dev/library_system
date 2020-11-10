@@ -11,8 +11,12 @@ public class Book extends Product implements Serializable {
 	/**
 	 * Constructor for Book which extends Product.
 	 * 
-	 * @param pages     Sets amount of pages for Book.
-	 * @param publisher Sets who the publisher is for Book.
+	 * @param pages         Sets amount of pages for Book.
+	 * @param publisher     Sets who the publisher is for Book.
+	 * @param articleNumber Gets article number for Book.
+	 * @param productName   Gets product name for Book.
+	 * @param type          Gets type for Product.
+	 * @param value         Gets value for Product.
 	 * super gets variables from Product through inheritance.
 	 */
 	public Book(int articleNumber, String productName, int pages, String publisher, String type, double value) {
