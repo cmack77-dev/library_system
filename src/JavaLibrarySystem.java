@@ -3,9 +3,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.*;
 
@@ -42,7 +44,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 */
 	enum Command {
 
-		LIST, CUSTOMERS, CHECKOUT, CHECKIN, REGISTER, DEREGISTER, INFO, QUIT, UNKNOWN,
+		LIST, HELP, CUSTOMERS, CHECKOUT, CHECKIN, REGISTER, DEREGISTER, INFO, QUIT, UNKNOWN,
 	}
 
 	/**
@@ -53,6 +55,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 */
 	public static void main(String[] args) throws Exception{
 		System.out.println("Welcome!");
+		System.out.println("\nFor instructions on how to use the program enter help.\n");
 		// Create instance of LibraryManager
 		JavaLibrarySystem libraryManager = new JavaLibrarySystem();
 
@@ -189,6 +192,9 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			case LIST:
 				listProductsCommand();
 				break;
+			case HELP:
+				help();
+				break;
 			case CUSTOMERS:
 				listCustomerCommand();
 				break;
@@ -224,6 +230,46 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 		scanner.close();
 
+	}
+
+	/**
+	 * Reads in the readmefile for instructions on the screen.
+	 */
+	private void help() {
+		
+		File txtObject = new File("Help.txt");
+		Scanner reader = null;
+		String line = "";
+		try {
+			reader = new Scanner(txtObject);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		while (reader.hasNextLine()) {
+			System.out.println(reader.nextLine());
+			
+//			line = line + (reader.next() + " ");
+		}
+//		System.out.println(line);
+//		reader.close();
+//		File file = new File("c.txt");
+//		file.createNewFile();
+//		FileWriter myWriter = new FileWriter(file);
+//		myWriter.write(line);
+//		myWriter.close();
+//		reader.close();
+//		
+//		File filePath = new File("a.txt"); 
+//		Scanner scanner = new Scanner((File)filePath);
+//		while (scanner.hasNext()) {
+//			System.out.println(scanner.next());
+//		}
+//		
+//		PrintWriter pw = new PrintWriter("h.txt");
+//		pw.write("TEST");
+//		pw.close();
+	
+		
 	}
 
 	/**
@@ -494,6 +540,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		switch (commandString) {
 		case "list":
 			return Command.LIST;
+		case "help":
+			return Command.HELP;	// Added function for printing out instructions for the program.
 		case "customers":
 			return Command.CUSTOMERS; // Added function for retrieving list of customers.
 		case "checkout":
