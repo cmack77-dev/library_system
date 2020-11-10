@@ -50,6 +50,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	/**
 	 * Main function. Initializes system.
 	 * 
+	 * @param args args in main.
 	 */
 	public static void main(String[] args) {
 		System.out.println("Welcome!");
@@ -134,6 +135,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	/**
 	 * The method that handles the runtime part of the program. All commands are
 	 * entered through this UI.
+	 * 
+	 * @param libraryManager The libraryManager object is passed to methods invoked.
 	 */
 	public void runSystem(JavaLibrarySystem<E> libraryManager) {
 		listProductsCommand();
@@ -217,8 +220,6 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 
 	/**
 	 * Method for listing all customers.
-	 * 
-	 * @param libraryManager
 	 */
 	public void listCustomerCommand() {
 		for (Customer customer : this.customers) {
@@ -226,10 +227,20 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		}
 	}
 
+	/**
+	 * Sorts the list of products
+	 * 
+	 * @param libraryManager passed to sort products.
+	 */
 	public void sortProductList(JavaLibrarySystem<E> libraryManager) {
 		Collections.sort(libraryManager.products);
 	}
 
+	/**
+	 * Sorts the list of customers
+	 * 
+	 * @param libraryManager passed to sort customers.
+	 */
 	public void sortCustomerList(JavaLibrarySystem<E> libraryManager) {
 		Collections.sort(libraryManager.customers);
 	}
@@ -247,7 +258,9 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * Sets a specified product to borrowed by a specific customer who already
 	 * exists or gets created by user.
 	 * 
-	 * @param argument holds the productID to be checked out.
+	 * @param argument       Holds the productID for the product to be checked out.
+	 * @param libraryManager The libraryManager object is passed to save and sort
+	 *                       method invoked.
 	 */
 	public void checkOutCommand(String argument, JavaLibrarySystem<E> libraryManager) {
 		int productID = Integer.parseInt(argument);
@@ -290,6 +303,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			} else if (in.equals("b")) {
 				System.out.print("Enter customer ID:\n> ");
 				customerID = userReg.nextInt();
+
 				boolean customerExists = false;
 				for (int i = 0; i < this.customers.size(); i++) {
 					if (this.customers.get(i).getCustomerID() == customerID) {
@@ -298,11 +312,12 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 						customer = this.customers.get(i);
 						customerExists = true;
 					}
-					if (!customerExists) {
-						System.out.println("No such customerID");
-						return;
-					}
 				}
+				if (!customerExists) {
+					System.out.println("No such customerID");
+					return;
+				}
+
 			} else if (in != "a" && in != "b") {
 				System.out.println("Error! Enter a or b");
 				return;
@@ -355,7 +370,8 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	/**
 	 * Registers a new product.
 	 * 
-	 * @param libraryManager
+	 * @param libraryManager The libraryManager object is passed to save and sort
+	 *                       method invoked.
 	 * 
 	 */
 	public void registerCommand(JavaLibrarySystem<E> libraryManager) {
@@ -363,13 +379,13 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		System.out.print("What do you want to register? Movie (a), Book (b)\n> ");
 		String in = userReg.nextLine().toLowerCase();
 		if (in.equals("a")) {
-			System.out.print("Enter product ID (numbers) :\n> ");
+			System.out.print("Enter product ID (number):\n> ");
 			int productID;
 			try {
 				productID = userReg.nextInt();
 			} catch (InputMismatchException e) {
 				System.out.println("Error: Product ID should only contain numbers. Try again!");
-				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
+				System.out.println("\n (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			while (!isUniqueID(productID)) {
@@ -380,13 +396,13 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			userReg.nextLine();
 			System.out.print("Enter title:\n> ");
 			String title = userReg.nextLine();
-			System.out.print("Enter value (numbers) :\n> ");
+			System.out.print("Enter value (number):\n> ");
 			double value;
 			try {
 				value = userReg.nextDouble();
 			} catch (InputMismatchException e) {
 				System.out.println("Error: Value should only contain numbers (price). Try again!");
-				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
+				System.out.println("\n (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			userReg.nextLine();
@@ -396,30 +412,30 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				runningTime = userReg.nextInt();
 			} catch (InputMismatchException e) {
 				System.out.println("Error: Running time should only contain numbers (minutes). Try again!");
-				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
+				System.out.println("\n (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			userReg.nextLine();
-			System.out.print("Enter imdbRating (numbers) :\n> ");
+			System.out.print("Enter imdbRating (number):\n> ");
 			float imdbRating;
 			try {
 				imdbRating = userReg.nextFloat();
 			} catch (InputMismatchException e) {
 				System.out.println("Error: Rating should only contain numbers. Try again!");
-				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
+				System.out.println("\n (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			this.products.add((E) new Movie(productID, title, runningTime, imdbRating, "Movie", value));
 			System.out.println("Successfully registered " + title + "!");
 
 		} else if (in.equals("b")) {
-			System.out.print("Enter product ID (numbers) :\n> ");
+			System.out.print("Enter product ID (number):\n> ");
 			int productID;
 			try {
 				productID = userReg.nextInt();
 			} catch (InputMismatchException e) {
 				System.out.println("Error: Product ID should only contain numbers. Try again!");
-				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
+				System.out.println("\n (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			while (!isUniqueID(productID)) {
@@ -435,7 +451,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				value = userReg.nextDouble();
 			} catch (InputMismatchException e) {
 				System.out.println("Error: Value should only contain numbers (price). Try again!");
-				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
+				System.out.println("\n (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			userReg.nextLine();
@@ -445,7 +461,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 				numberOfPages = userReg.nextInt();
 			} catch (InputMismatchException e) {
 				System.out.println("Error: Pages should only contain numbers. Try again!");
-				System.out.println("\n Enter command (For instructions on how to use the program enter help.)\n");
+				System.out.println("\n (For instructions on how to use the program enter help.)\n");
 				return;
 			}
 			userReg.nextLine();
@@ -480,8 +496,9 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	/**
 	 * Deletes a product from library.
 	 * 
-	 * @param argument       holds the productID of product to be deleted.
-	 * @param libraryManager
+	 * @param argument       Holds the productID of product to be deleted.
+	 * @param libraryManager The libraryManager object is passed to save and sort
+	 *                       method invoked.
 	 */
 	public void deRegisterCommand(String argument, JavaLibrarySystem<E> libraryManager) {
 		try {
@@ -500,7 +517,6 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			}
 		} catch (NumberFormatException e) {
 			System.out.println("Error. Enter deregister and an articlenumber. Try again");
-
 		}
 		sortProductList(libraryManager);
 		saveFile(libraryManager);
@@ -525,6 +541,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 		if (noSuchProductID) {
 			System.out.println("No product with id " + productID + " registered.");
 		}
+		Product.showInfo = false;
 	}
 
 	/**
@@ -533,8 +550,6 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 	 * @param libraryManager The JavaLibrarySystem object is passed to the method in
 	 *                       order to initialize it with data from the .bin file.
 	 * @return The initialized JavaLibrarySystem object.
-	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
 	public static JavaLibrarySystem readFile(JavaLibrarySystem libraryManager) {
 
@@ -594,7 +609,7 @@ public class JavaLibrarySystem<E extends Product> implements Serializable {
 			oos.writeObject(libraryManager);
 			oos.close();
 		} catch (IOException e) {
-			System.out.println("Caught exception:");
+			System.out.println("Caught IOexception:");
 			e.printStackTrace();
 		} catch (Exception e) {
 			System.out.println("Caught exception:");
